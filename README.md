@@ -74,6 +74,7 @@ See `src/lib/api.ts` for the client wrapper and `src/app/api/pokemon/*` for hand
 - `PokemonList` combines search bar, filters, results grid, and pagination
 - `PokemonListItem` renders a compact card with favorite toggle
 - `PokemonDetail` shows artwork, types, and key stats with favorite control
+- **Notes on Detail**: On the Pokémon detail page, you can add a single note for each Pokémon. The note is stored in `localStorage`, can be edited or deleted, and is validated to not be empty.
 - `FilterControls` includes type, sort, order, favorites-only, and reset
 - `SearchBar` debounced input (300ms)
 - `ErrorDisplay` and skeletons for resilient states

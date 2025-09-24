@@ -9,6 +9,9 @@ import Image from "next/image";
 import { Skeleton } from "./loading-skeleton";
 import { ErrorDisplay } from "./error-display";
 import { ThemeToggle } from "./theme-toggle";
+import React, { useState, useEffect } from "react";
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
 
 interface PokemonDetailProps {
   id: string;
@@ -17,6 +20,77 @@ interface PokemonDetailProps {
 export function PokemonDetail({ id }: PokemonDetailProps) {
   const { data: pokemon, isLoading, error, refetch } = usePokemon(id);
   const { isFavorite, toggleFavoriteOptimistic } = useFavorites();
+  const [note, setNote] = useState("");
+  const [savedNote, setSavedNote] = useState<string | null>(null);
+  const [errorNote, setError] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Load note from localStorage for this id
+  useEffect(() => {
+    const stored = localStorage.getItem("pokemon_notes");
+    if (stored) {
+      try {
+        const arr = JSON.parse(stored) as { id: string; note: string }[];
+        const found = arr.find((n) => n.id === id);
+        setSavedNote(found ? found.note : null);
+        setNote(found ? found.note : "");
+        setIsEditing(false);
+      } catch {
+        setSavedNote(null);
+        setNote("");
+        setIsEditing(false);
+      }
+    } else {
+      setSavedNote(null);
+      setNote("");
+      setIsEditing(false);
+    }
+  }, [id]);
+
+  // Add or update note handler
+  function handleAddOrUpdateNote(e: React.FormEvent) {
+    e.preventDefault();
+    if (!note.trim()) {
+      setError("Note cannot be empty.");
+      return;
+    }
+    setError("");
+    const stored = localStorage.getItem("pokemon_notes");
+    let arr: { id: string; note: string }[] = [];
+    if (stored) {
+      try {
+        arr = JSON.parse(stored);
+      } catch {
+        arr = [];
+      }
+    }
+    // Remove any existing note for this id
+    arr = arr.filter((n) => n.id !== id);
+    const newNote = { id, note: note.trim() };
+    arr.push(newNote);
+    localStorage.setItem("pokemon_notes", JSON.stringify(arr));
+    setSavedNote(newNote.note);
+    setIsEditing(false);
+  }
+
+  // Delete note handler
+  function handleDeleteNote() {
+    const stored = localStorage.getItem("pokemon_notes");
+    let arr: { id: string; note: string }[] = [];
+    if (stored) {
+      try {
+        arr = JSON.parse(stored);
+      } catch {
+        arr = [];
+      }
+    }
+    arr = arr.filter((n) => n.id !== id);
+    localStorage.setItem("pokemon_notes", JSON.stringify(arr));
+    setSavedNote(null);
+    setNote("");
+    setIsEditing(false);
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -200,6 +274,79 @@ export function PokemonDetail({ id }: PokemonDetailProps) {
                     </div>
                   </div>
                 </div>
+
+                {/* Note Form */}
+                <div className="mt-8">
+                  <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
+                    Note
+                  </h2>
+                  {savedNote !== null && !isEditing ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-start justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">
+                          {savedNote}
+                        </span>
+                        <div className="flex gap-2 ml-4">
+                          <Button
+                            onClick={() => {
+                              setIsEditing(true);
+                              setNote(savedNote);
+                              setError("");
+                            }}
+                            variant={"secondary"}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            onClick={handleDeleteNote}
+                            variant={"destructive"}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <form
+                      onSubmit={handleAddOrUpdateNote}
+                      className="flex flex-col gap-2"
+                    >
+                      <Textarea
+                        className="border rounded p-2"
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        rows={3}
+                        placeholder="Write your note here..."
+                      />
+                      {errorNote && (
+                        <span className="text-red-500 text-sm">{errorNote}</span>
+                      )}
+                      <div className="flex gap-2">
+                        <Button
+                          type="submit"
+                          // className="px-4 py-2"
+                        >
+                          {savedNote !== null ? "Update Note" : "Add Note"}
+                        </Button>
+                        {savedNote !== null && (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            // className="px-4 py-2"
+                            onClick={() => {
+                              setIsEditing(false);
+                              setNote(savedNote);
+                              setError("");
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        )}
+                      </div>
+                    </form>
+                  )}
+                </div>
+                {/* End Note Form */}
               </div>
             </div>
           </div>
