@@ -50,6 +50,7 @@ export function PokemonListItem({ pokemon, className, toggleFavoriteOptimistic, 
                   isFav ? 'text-yellow-500 hover:text-yellow-600' : 'text-gray-400 hover:text-yellow-500'
                 )}
                 aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
+                data-testid="favorite-btn"
               >
                 {isFav ? <Star className="w-4 h-4 fill-current" /> : <Heart className="w-4 h-4" />}
               </Button>
