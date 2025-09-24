@@ -99,4 +99,25 @@ See `src/lib/api.ts` for the client wrapper and `src/app/api/pokemon/*` for hand
 - Optional: Deploy on Vercel
 
 ## License
-For demonstration and evaluation purposes."# test-task-next-poke" 
+For demonstration and evaluation purposes.
+
+## Testing
+
+### End-to-End (E2E) Tests
+
+This project includes a basic Playwright E2E test to verify the favorites functionality:
+
+- **Favorite Toggle Test**: Ensures that clicking the favorite button on a Pokémon toggles its state between "Add to favorites" and "Remove from favorites" via the `aria-label` attribute.
+
+#### Running Playwright Tests
+
+1. Install Playwright and its browsers:
+   ```bash
+   npx playwright install
+   ```
+2. Run the E2E tests:
+   ```bash
+   npx playwright test
+   ```
+
+Test files are located in the `tests/e2e/` directory.
